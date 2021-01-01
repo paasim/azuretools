@@ -1,0 +1,32 @@
+Package: azuretools
+Title: An R Package For Interacting With Azure Services
+Version: 0.1.0
+Authors@R: 
+    person(given = "Markus",
+           family = "Paasiniemi",
+           role = c("aut", "cre"),
+           email = "paasim@iki.fi")
+Description: Some tools or working with azure services. 
+    Currently contains a function for working with the blob services API,
+    but in the future more functionality, e.g. for working with the key vault
+    api, might be added.
+License: MIT + file LICENSE
+Imports:
+    digest,
+    dplyr,
+    fs,
+    glue,
+    httr,
+    magrittr,
+    mime,
+    openssl,
+    purrr,
+    readr,
+    tibble,
+    xml2
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat
