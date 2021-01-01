@@ -111,11 +111,11 @@ blobs_list <- function(storage_account, container_name, azure_access_key) {
   result <- GET(url, headers)
   stop_for_status(result)
 
-  tbl <- read_xml(result$content) %>%
+  read_xml(result$content) %>%
     as_list() %>%
     pluck("EnumerationResults", "Blobs") %>%
-    map_dfr(blob_parse)
-  if (ncol(tbl) == 0L) empty_blob_tbl() else tbl
+    map_dfr(blob_parse) %>%
+    bind_rows(empty_blob_tbl())
 }
 
 #' Delete a blob

@@ -5,6 +5,7 @@
 #' @docType package
 #' @name azuretools
 #' @importFrom digest hmac
+#' @importFrom dplyr bind_rows
 #' @importFrom fs as_fs_bytes file_size path_file
 #' @importFrom glue glue glue_collapse
 #' @importFrom httr add_headers DELETE GET PUT stop_for_status upload_file
