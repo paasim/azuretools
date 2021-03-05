@@ -14,6 +14,8 @@
 #' @export
 blob_download <- function(storage_account, container_name, azure_access_key, resource_path,
                           dest_file = character(0)) {
+  # url encode resource_path
+  resource_path <- URLencode(resource_path)
 
   # headers
   x_ms_date <- get_x_ms_date()
@@ -49,34 +51,40 @@ blob_download <- function(storage_account, container_name, azure_access_key, res
 #' Parse blob metadata
 #'
 #' Extracts blob metadata from a list obtained from parsing the xml result from
-#' the blob service API. Used as a helper function for [blobs_list()].
+#' the blob service API. Used as a helper function for [blobs_list()]. Drops
+#' blobs with content length `0`.
 #'
 #' @param blob A list containing the blob metadata. (If there are no blobs,
 #' the result is a tibble with 0 rows and 0 columns).
 #'
 blob_parse <- function(blob) {
+  if (blob$Properties$`Content-Length`[[1]] == 0L) {
+    return(empty_blob_tbl())
+  }
   # / added for consistency with other functions that expect absolute file path
   tibble(path = paste0("/", blob$Name[[1]]),
          size = as_fs_bytes(blob$Properties$`Content-Length`[[1]]),
          type = blob$Properties$`Content-Type`[[1]],
          creation_time = as.POSIXct(blob$Properties$`Creation-Time`[[1]],
-                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"),
+                                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"),
          last_modified = as.POSIXct(blob$Properties$`Last-Modified`[[1]],
-                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"))
+                                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"))
 }
 
 empty_blob_tbl <- function() {
   # a tibble with 0 rows but the correct columns and types
   tibble(path = character(0),
          size = as_fs_bytes(character(0)),
-         type = character(),
+         type = character(0),
          creation_time = as.POSIXct(character(0)),
          last_modified = as.POSIXct(character(0)))
 }
 
+
 #' List blobs
 #'
-#' Lists all the blobs in the given container.
+#' Lists all the blobs in the given container. Ignores blobs with content length
+#' `0`.
 #'
 #' @param storage_account The name of the storage account
 #' @param container_name The name of the container
@@ -125,12 +133,14 @@ blobs_list <- function(storage_account, container_name, azure_access_key) {
 #' @param storage_account The name of the storage account
 #' @param container_name The name of the container
 #' @param azure_access_key Access key to the storage account
-#' @param path Path to the blob
+#' @param resource_path Path to the blob
 #'
 #' @return The result of the request is returned invisibly.
 #'
 #' @export
-blob_delete <- function(storage_account, container_name, azure_access_key, path) {
+blob_delete <- function(storage_account, container_name, azure_access_key, resource_path) {
+  # url encode resource_path
+  resource_path <- URLencode(resource_path)
 
   # headers
   x_ms_date <- get_x_ms_date()
@@ -139,7 +149,7 @@ blob_delete <- function(storage_account, container_name, azure_access_key, path)
 
   # headers and query parameters
   canonicalized_headers <- get_canonicalized_headers(x_ms_blob_type, x_ms_date, x_ms_version)
-  canonicalized_resource <- get_canonicalized_resource(storage_account, container_name, path)
+  canonicalized_resource <- get_canonicalized_resource(storage_account, container_name, resource_path)
 
   # request signature encrypted with azure access key
   signature <- get_string_to_sign(canonicalized_headers, canonicalized_resource, http_method = "DELETE") %>%
@@ -147,7 +157,7 @@ blob_delete <- function(storage_account, container_name, azure_access_key, path)
   authorization <- get_authorization(storage_account, signature)
 
   # request url and headers
-  url <- construct_url(storage_account, container_name, path)
+  url <- construct_url(storage_account, container_name, resource_path)
   headers <- add_headers(`x-ms-date` = x_ms_date,
                          `x-ms-version` = x_ms_version,
                          `x-ms-blob-type` = x_ms_blob_type,
@@ -173,6 +183,8 @@ blob_delete <- function(storage_account, container_name, azure_access_key, path)
 #' @export
 blob_upload <- function(storage_account, container_name, azure_access_key,
                         source_file_path, destination_path = "/") {
+  # url encode resource_path
+  destination_path <- URLencode(destination_path)
 
   # headers
   x_ms_date <- get_x_ms_date()

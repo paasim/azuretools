@@ -12,5 +12,6 @@ the result is a tibble with 0 rows and 0 columns).}
 }
 \description{
 Extracts blob metadata from a list obtained from parsing the xml result from
-the blob service API. Used as a helper function for \code{\link[=blobs_list]{blobs_list()}}.
+the blob service API. Used as a helper function for \code{\link[=blobs_list]{blobs_list()}}. Drops
+blobs with content length \code{0}.
 }

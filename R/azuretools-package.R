@@ -15,5 +15,6 @@
 #' @importFrom purrr map_dfr pluck
 #' @importFrom readr write_file
 #' @importFrom tibble tibble
+#' @importFrom utils URLencode
 #' @importFrom xml2 read_xml as_list
 NULL
