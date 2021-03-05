@@ -4,7 +4,7 @@
 \alias{blob_delete}
 \title{Delete a blob}
 \usage{
-blob_delete(storage_account, container_name, azure_access_key, path)
+blob_delete(storage_account, container_name, azure_access_key, resource_path)
 }
 \arguments{
 \item{storage_account}{The name of the storage account}
@@ -13,7 +13,7 @@ blob_delete(storage_account, container_name, azure_access_key, path)
 
 \item{azure_access_key}{Access key to the storage account}
 
-\item{path}{Path to the blob}
+\item{resource_path}{Path to the blob}
 }
 \value{
 The result of the request is returned invisibly.
