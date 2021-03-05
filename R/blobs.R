@@ -51,34 +51,40 @@ blob_download <- function(storage_account, container_name, azure_access_key, res
 #' Parse blob metadata
 #'
 #' Extracts blob metadata from a list obtained from parsing the xml result from
-#' the blob service API. Used as a helper function for [blobs_list()].
+#' the blob service API. Used as a helper function for [blobs_list()]. Drops
+#' blobs with content length `0`.
 #'
 #' @param blob A list containing the blob metadata. (If there are no blobs,
 #' the result is a tibble with 0 rows and 0 columns).
 #'
 blob_parse <- function(blob) {
+  if (blob$Properties$`Content-Length`[[1]] == 0L) {
+    return(empty_blob_tbl())
+  }
   # / added for consistency with other functions that expect absolute file path
   tibble(path = paste0("/", blob$Name[[1]]),
          size = as_fs_bytes(blob$Properties$`Content-Length`[[1]]),
          type = blob$Properties$`Content-Type`[[1]],
          creation_time = as.POSIXct(blob$Properties$`Creation-Time`[[1]],
-                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"),
+                                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"),
          last_modified = as.POSIXct(blob$Properties$`Last-Modified`[[1]],
-                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"))
+                                    tz = "GMT", format = "%a, %d %b %Y %H:%M:%S"))
 }
 
 empty_blob_tbl <- function() {
   # a tibble with 0 rows but the correct columns and types
   tibble(path = character(0),
          size = as_fs_bytes(character(0)),
-         type = character(),
+         type = character(0),
          creation_time = as.POSIXct(character(0)),
          last_modified = as.POSIXct(character(0)))
 }
 
+
 #' List blobs
 #'
-#' Lists all the blobs in the given container.
+#' Lists all the blobs in the given container. Ignores blobs with content length
+#' `0`.
 #'
 #' @param storage_account The name of the storage account
 #' @param container_name The name of the container

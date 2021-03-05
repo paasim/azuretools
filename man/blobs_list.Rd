@@ -17,5 +17,6 @@ blobs_list(storage_account, container_name, azure_access_key)
 A tibble with information of the blobs.
 }
 \description{
-Lists all the blobs in the given container.
+Lists all the blobs in the given container. Ignores blobs with content length
+\code{0}.
 }
